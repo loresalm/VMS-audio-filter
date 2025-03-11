@@ -142,8 +142,6 @@ void Test_filterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     // check if the volumne needs to be reduced
     if (shouldReduceVolume){
         rawVolume = 0.05;
-    }else{
-        rawVolume = 1;
     }
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {

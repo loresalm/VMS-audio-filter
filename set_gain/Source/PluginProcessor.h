@@ -56,12 +56,11 @@ public:
     //==============================================================================
     void setToggleState(bool state) { shouldReduceVolume = state; }
     bool getToggleState() const { return shouldReduceVolume; }
-
+    void setRawVolume(double volume) {rawVolume = volume; }
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Test_filterAudioProcessor)
     //==============================================================================
-    
     double rawVolume;
     bool shouldReduceVolume = false;
 

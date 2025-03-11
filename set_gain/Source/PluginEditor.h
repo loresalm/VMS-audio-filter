@@ -14,7 +14,8 @@
 //==============================================================================
 /**
 */
-class Test_filterAudioProcessorEditor  : public juce::AudioProcessorEditor
+class Test_filterAudioProcessorEditor  : public juce::AudioProcessorEditor,
+                                         public juce::Slider::Listener
 {
 public:
     Test_filterAudioProcessorEditor (Test_filterAudioProcessor&);
@@ -23,6 +24,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    void sliderValueChanged(juce::Slider *slider) override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -35,6 +37,8 @@ private:
     
     // Declare a toggle button
     juce::ToggleButton toggleButton;
+    juce::Slider gainSlider;
+    
     bool shouldReduceVolume = false;
 
     // Function to handle toggle button changes
