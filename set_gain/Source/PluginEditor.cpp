@@ -23,7 +23,10 @@ Test_filterAudioProcessorEditor::Test_filterAudioProcessorEditor (Test_filterAud
     gainSlider.setValue(0.5);
     gainSlider.addListener(this);
     
-    
+    // add midi msg display
+    addAndMakeVisible(midiMessageLabel);
+    midiMessageLabel.setText("No MIDI message received", juce::dontSendNotification);
+        
     // Add button to editor
     addAndMakeVisible(toggleButton);
     addAndMakeVisible(gainSlider);
@@ -55,6 +58,8 @@ void Test_filterAudioProcessorEditor::resized()
     toggleButton.setBounds (200, 10, 100, 30);
     // Set slider bounds
     gainSlider.setBounds(getLocalBounds());
+    // set midi msg bounds
+    midiMessageLabel.setBounds(10, getHeight() - 40, getWidth() - 20, 30);
 }
 
 void Test_filterAudioProcessorEditor::toggleButtonChanged()

@@ -140,6 +140,24 @@ void Test_filterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     
     //==============================================================================
     // check if the volumne needs to be reduced
+    
+    // Process incoming MIDI messages
+    for (const juce::MidiMessageMetadata metadata : midiMessages)
+    {
+        juce::MidiMessage message = metadata.getMessage();
+        
+        if (message.isController())
+        {
+            int controllerNumber = message.getControllerNumber();
+            rawVolume = message.getControllerValue() / 127.0f; // Convert to 0-1 range
+            
+            // If this is the controller you want to map to gain
+            // You can either hardcode a specific CC number or make it configurable
+            // applyParameterValue(yourGainParameter, value);
+        }
+    }
+    
+    
     if (shouldReduceVolume){
         rawVolume = 0.05;
     }

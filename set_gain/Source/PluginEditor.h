@@ -38,6 +38,7 @@ private:
     // Declare a toggle button
     juce::ToggleButton toggleButton;
     juce::Slider gainSlider;
+    juce::Label midiMessageLabel;
     
     bool shouldReduceVolume = false;
 
