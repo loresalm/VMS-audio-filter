@@ -15,7 +15,8 @@
 /**
 */
 class Test_filterAudioProcessorEditor  : public juce::AudioProcessorEditor,
-                                         public juce::Slider::Listener
+                                         public juce::Slider::Listener,
+                                         public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     Test_filterAudioProcessorEditor (Test_filterAudioProcessor&);
@@ -25,6 +26,14 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void sliderValueChanged(juce::Slider *slider) override;
+    // Listener function for parameter changes
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
+    
+    void updateMIDIText(int controllerNumber, int controllerValue);
+
+    // New label to display MIDI CC info
+    juce::Label midiCCLabel;
+    
 
 private:
     // This reference is provided as a quick way for your editor to

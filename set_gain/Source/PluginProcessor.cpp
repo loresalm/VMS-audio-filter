@@ -19,7 +19,11 @@ Test_filterAudioProcessor::Test_filterAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+       parameters (*this, nullptr, "PARAMETERS",
+       {
+           std::make_unique<juce::AudioParameterFloat>("gain", "Gain", 0.0f, 1.0f, 0.5f)
+       })
 #endif
 {
 }
@@ -139,38 +143,37 @@ void Test_filterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
         buffer.clear (i, 0, buffer.getNumSamples());
     
     //==============================================================================
-    // check if the volumne needs to be reduced
     
-    // Process incoming MIDI messages
-    for (const juce::MidiMessageMetadata metadata : midiMessages)
+    // Get current gain value from ValueTreeState
+        float gainValue = *parameters.getRawParameterValue("gain");
+    
+    // Check incoming MIDI messages
+    for (const auto metadata : midiMessages)
     {
-        juce::MidiMessage message = metadata.getMessage();
+        auto message = metadata.getMessage();
         
-        if (message.isController())
+        if (message.isController())  // If it's a MIDI CC message
         {
-            int controllerNumber = message.getControllerNumber();
-            rawVolume = message.getControllerValue() / 127.0f; // Convert to 0-1 range
+            controllerNumber = message.getControllerNumber();
+            controllerValue = message.getControllerValue();
             
-            // If this is the controller you want to map to gain
-            // You can either hardcode a specific CC number or make it configurable
-            // applyParameterValue(yourGainParameter, value);
+            if (controllerNumber == 1)  // Change CC number to match your MIDI controller knob
+            {
+                gainValue = juce::jmap<float>(controllerValue, 0, 127, 0.0f, 1.0f); // Normalize 0-127 to 0.0-1.0
+                parameters.getParameter("gain")->setValueNotifyingHost(gainValue); // Update parameter
+            }
         }
     }
-    
-    
-    if (shouldReduceVolume){
-        rawVolume = 0.05;
-    }
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
 
-        for (int sample = 0; sample < buffer.getNumSamples(); sample ++)
+    // Apply gain to audio
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {
-            channelData[sample] = buffer.getSample(channel, sample) * rawVolume;
+            auto* channelData = buffer.getWritePointer(channel);
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+            {
+                channelData[sample] *= gainValue;
+            }
         }
-        
-    }
 }
 
 //==============================================================================
@@ -204,3 +207,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new Test_filterAudioProcessor();
 }
+
+
+int Test_filterAudioProcessor::getControllerNumber() { return controllerNumber; }
+int Test_filterAudioProcessor::getcontrollerValue() { return controllerValue; }
