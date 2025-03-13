@@ -60,12 +60,16 @@ public:
     juce::AudioProcessorValueTreeState& getParameters() { return parameters; }
     int getControllerNumber();
     int getcontrollerValue();
+    bool getMidiActivity() const { return midiActivityDetected; }
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Test_filterAudioProcessor)
     //==============================================================================
     double rawVolume;
     bool shouldReduceVolume = false;
+    bool midiActivityDetected = false;
+
     juce::AudioProcessorValueTreeState parameters;
     
     int controllerNumber;

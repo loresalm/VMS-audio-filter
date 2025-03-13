@@ -11,6 +11,42 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
+
+
+// In your PluginEditor.h, add:
+class MidiActivityIndicator : public juce::Component
+{
+public:
+    MidiActivityIndicator()
+    {
+        midiActive = false;
+    }
+
+    void paint(juce::Graphics& g) override
+    {
+        // Draw the square
+        g.setColour(midiActive ? juce::Colours::dodgerblue : juce::Colours::darkgrey);
+        g.fillRect(getLocalBounds());
+        g.setColour(juce::Colours::black);
+        g.drawRect(getLocalBounds(), 1);
+    }
+
+    void setMidiActivity(bool active)
+    {
+        if (midiActive != active)
+        {
+            midiActive = active;
+            repaint();
+        }
+    }
+
+private:
+    bool midiActive;
+};
+
+
+
+
 //==============================================================================
 /**
 */
@@ -30,6 +66,8 @@ public:
     void parameterChanged(const juce::String& parameterID, float newValue) override;
     
     void updateMIDIText(int controllerNumber, int controllerValue);
+    void updateMidiActivity(bool active) { midiIndicator.setMidiActivity(active); }
+
 
     // New label to display MIDI CC info
     juce::Label midiCCLabel;
@@ -50,6 +88,7 @@ private:
     juce::Label midiMessageLabel;
     
     bool shouldReduceVolume = false;
+    MidiActivityIndicator midiIndicator;
 
     // Function to handle toggle button changes
     void toggleButtonChanged();

@@ -145,26 +145,34 @@ void Test_filterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     //==============================================================================
     
     // Get current gain value from ValueTreeState
-        float gainValue = *parameters.getRawParameterValue("gain");
+    float gainValue = *parameters.getRawParameterValue("gain");
+    //midiActivityDetected = false;
+    if (!midiMessages.isEmpty())
+        {
+            // MIDI messages exist in the buffer
+            midiActivityDetected = true;
+        
+        }
     
     // Check incoming MIDI messages
     for (const auto metadata : midiMessages)
     {
+        midiActivityDetected = true;
         auto message = metadata.getMessage();
+        controllerNumber = message.getControllerNumber();
+        controllerValue = message.getControllerValue();
         
         if (message.isController())  // If it's a MIDI CC message
         {
-            controllerNumber = message.getControllerNumber();
-            controllerValue = message.getControllerValue();
             
-            if (controllerNumber == 1)  // Change CC number to match your MIDI controller knob
+            if (message.getControllerNumber() == 7)  // Change CC number to match your MIDI controller knob
             {
-                gainValue = juce::jmap<float>(controllerValue, 0, 127, 0.0f, 1.0f); // Normalize 0-127 to 0.0-1.0
+                gainValue = message.getControllerValue() / 127.0f; // Normalize 0-127 to 0.0-1.0
                 parameters.getParameter("gain")->setValueNotifyingHost(gainValue); // Update parameter
             }
         }
     }
-
+    
     // Apply gain to audio
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {

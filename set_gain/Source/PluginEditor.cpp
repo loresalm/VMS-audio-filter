@@ -13,7 +13,8 @@
 Test_filterAudioProcessorEditor::Test_filterAudioProcessorEditor (Test_filterAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    
+    // Add the MIDI indicator to the GUI
+    addAndMakeVisible(midiIndicator);
     
     // Set up the MIDI CC Label
     midiCCLabel.setText("MIDI CC: 0", juce::dontSendNotification);  // Default text
@@ -58,11 +59,14 @@ void Test_filterAudioProcessorEditor::paint (juce::Graphics& g)
     const juce::String colourString ("0a0a0a");
     const juce::Colour colour (juce::Colour::fromString ("FF" + colourString));
     g.fillAll (colour);
+    bool active = audioProcessor.getMidiActivity();
+    midiIndicator.setMidiActivity(active);
 }
 
 void Test_filterAudioProcessorEditor::resized()
 {
-    midiCCLabel.setBounds(10, 10, 200, 40);
+    //midiCCLabel.setBounds(1, 10, 200, 40);
+    midiIndicator.setBounds(getWidth() - 20, 10, 10, 10); // Position in top-right corner
     // Set button bounds (centered)
     // toggleButton.setBounds (200, 10, 100, 30);
     // Set slider bounds
