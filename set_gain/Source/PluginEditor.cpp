@@ -8,11 +8,31 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "MidiGainController.h"
 
 //==============================================================================
 Test_filterAudioProcessorEditor::Test_filterAudioProcessorEditor (Test_filterAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+   
+    // Set up gain label
+    addAndMakeVisible(gainLabel);
+    gainLabel.setText("Gain", juce::dontSendNotification);
+    gainLabel.setJustificationType(juce::Justification::centred);
+    
+    // Set up connection status label
+    addAndMakeVisible(connectionStatusLabel);
+    connectionStatusLabel.setJustificationType(juce::Justification::centred);
+    updateConnectionStatus(); // Initial status
+    
+    // Connect slider to parameter using the getter method
+    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        audioProcessor.getParameters(), "gain", gainSlider);
+    
+    // Start timer to check connection status periodically
+    startTimer(1000); // Check every second
+        
+    
     // Add the MIDI indicator to the GUI
     addAndMakeVisible(midiIndicator);
     
@@ -49,6 +69,7 @@ Test_filterAudioProcessorEditor::Test_filterAudioProcessorEditor (Test_filterAud
 Test_filterAudioProcessorEditor::~Test_filterAudioProcessorEditor()
 {
     audioProcessor.getParameters().removeParameterListener("gain", this);
+    stopTimer();
 }
 
 //==============================================================================
@@ -65,6 +86,13 @@ void Test_filterAudioProcessorEditor::paint (juce::Graphics& g)
 
 void Test_filterAudioProcessorEditor::resized()
 {
+    
+    auto area = getLocalBounds().reduced(10);
+    // Status label at bottom
+    connectionStatusLabel.setBounds(area.removeFromBottom(30));
+    // Gain label at top
+    gainLabel.setBounds(area.removeFromTop(30));
+
     //midiCCLabel.setBounds(1, 10, 200, 40);
     midiIndicator.setBounds(getWidth() - 20, 10, 10, 10); // Position in top-right corner
     // Set button bounds (centered)
@@ -105,4 +133,23 @@ void Test_filterAudioProcessorEditor::updateMIDIText(int controllerNumber, int c
 {
     // Update the label text with the received MIDI CC value
     midiCCLabel.setText("MIDI CC: " + juce::String(controllerNumber) + " Value: " + juce::String(controllerValue), juce::dontSendNotification);
+}
+
+
+void Test_filterAudioProcessorEditor::timerCallback()
+{
+    updateConnectionStatus();
+}
+
+void Test_filterAudioProcessorEditor::updateConnectionStatus()
+{
+    bool connected = audioProcessor.isMidiControllerConnected();
+    
+    connectionStatusLabel.setText(
+        connected ? "MIDI Controller: Connected" : "MIDI Controller: Disconnected",
+        juce::dontSendNotification);
+        
+    connectionStatusLabel.setColour(
+        juce::Label::textColourId,
+        connected ? juce::Colours::green : juce::Colours::red);
 }

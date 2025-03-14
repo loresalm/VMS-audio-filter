@@ -9,11 +9,13 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "MidiGainController.h"
 
 //==============================================================================
 /**
 */
-class Test_filterAudioProcessor  : public juce::AudioProcessor
+class Test_filterAudioProcessor  : public juce::AudioProcessor,
+                                   public juce::MidiInputCallback
 {
 public:
     //==============================================================================
@@ -61,7 +63,16 @@ public:
     int getControllerNumber();
     int getcontrollerValue();
     bool getMidiActivity() const { return midiActivityDetected; }
+    bool isMidiControllerConnected() const
+        {
+            return midiController->isDeviceConnected();
+        }
+    void startMidiInput();
+    void stopMidiInput();
+    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
 
+    
+    
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Test_filterAudioProcessor)
@@ -74,5 +85,9 @@ private:
     
     int controllerNumber;
     int controllerValue;
+    
+    // The MIDI controller
+    std::unique_ptr<MidiGainController> midiController;
+    std::unique_ptr<juce::MidiInput> midiInputDevice;
 
 };

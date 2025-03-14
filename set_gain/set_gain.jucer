@@ -4,6 +4,10 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="jcmBez" name="set_gain">
     <GROUP id="{195B7E1D-4448-94AD-EB35-5FB6081EA1AE}" name="Source">
+      <FILE id="ztl6Mz" name="MidiGainController.cpp" compile="1" resource="0"
+            file="Source/MidiGainController.cpp"/>
+      <FILE id="OI6xga" name="MidiGainController.h" compile="0" resource="0"
+            file="Source/MidiGainController.h"/>
       <FILE id="BNThad" name="MidiFilter.h" compile="0" resource="0" file="Source/MidiFilter.h"/>
       <FILE id="F9hAAB" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "MidiGainController.h"
 
 //==============================================================================
 Test_filterAudioProcessor::Test_filterAudioProcessor()
@@ -26,10 +27,13 @@ Test_filterAudioProcessor::Test_filterAudioProcessor()
        })
 #endif
 {
+    midiController = std::make_unique<MidiGainController>(parameters);
+    startMidiInput();  // Start listening to MIDI input
 }
 
 Test_filterAudioProcessor::~Test_filterAudioProcessor()
 {
+    stopMidiInput(); // Stop listening to MIDI input when destroyed
 }
 
 //==============================================================================
@@ -99,6 +103,8 @@ void Test_filterAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    // Initialize MIDI controller
+    midiController->prepareToPlay();
 }
 
 void Test_filterAudioProcessor::releaseResources()
@@ -144,34 +150,20 @@ void Test_filterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
     
     //==============================================================================
     
-    // Get current gain value from ValueTreeState
-    float gainValue = *parameters.getRawParameterValue("gain");
-    //midiActivityDetected = false;
-    if (!midiMessages.isEmpty())
-        {
-            // MIDI messages exist in the buffer
-            midiActivityDetected = true;
-        
-        }
-    
-    // Check incoming MIDI messages
-    for (const auto metadata : midiMessages)
+    juce::MidiBuffer::Iterator it(midiMessages);
+    juce::MidiMessage message;
+    int samplePosition;
+
+    while (it.getNextEvent(message, samplePosition))
     {
-        midiActivityDetected = true;
-        auto message = metadata.getMessage();
-        controllerNumber = message.getControllerNumber();
-        controllerValue = message.getControllerValue();
-        
-        if (message.isController())  // If it's a MIDI CC message
+        if (midiController)
         {
-            
-            if (message.getControllerNumber() == 7)  // Change CC number to match your MIDI controller knob
-            {
-                gainValue = message.getControllerValue() / 127.0f; // Normalize 0-127 to 0.0-1.0
-                parameters.getParameter("gain")->setValueNotifyingHost(gainValue); // Update parameter
-            }
+            midiController->handleIncomingMidiMessage(nullptr, message);
         }
     }
+    
+    // Get current gain value from ValueTreeState
+    float gainValue = *parameters.getRawParameterValue("gain");
     
     // Apply gain to audio
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -216,6 +208,35 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new Test_filterAudioProcessor();
 }
 
-
 int Test_filterAudioProcessor::getControllerNumber() { return controllerNumber; }
 int Test_filterAudioProcessor::getcontrollerValue() { return controllerValue; }
+
+void Test_filterAudioProcessor::startMidiInput()
+{
+    auto availableDevices = juce::MidiInput::getAvailableDevices();
+    if (!availableDevices.isEmpty())
+    {
+        auto deviceID = availableDevices[0].identifier;
+        midiInputDevice = juce::MidiInput::openDevice(deviceID, this); // Now correctly assigned
+
+        if (midiInputDevice)
+            midiInputDevice->start();
+    }
+}
+
+void Test_filterAudioProcessor::stopMidiInput()
+{
+    if (midiInputDevice)
+    {
+        midiInputDevice->stop();
+        midiInputDevice.reset(); // Properly cleanup using unique_ptr
+    }
+}
+
+void Test_filterAudioProcessor::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+{
+    if (midiController)
+    {
+        midiController->handleIncomingMidiMessage(nullptr, message);
+    }
+}

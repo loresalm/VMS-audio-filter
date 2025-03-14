@@ -52,7 +52,8 @@ private:
 */
 class Test_filterAudioProcessorEditor  : public juce::AudioProcessorEditor,
                                          public juce::Slider::Listener,
-                                         public juce::AudioProcessorValueTreeState::Listener
+                                         public juce::AudioProcessorValueTreeState::Listener,
+                                         private juce::Timer
 {
 public:
     Test_filterAudioProcessorEditor (Test_filterAudioProcessor&);
@@ -67,6 +68,8 @@ public:
     
     void updateMIDIText(int controllerNumber, int controllerValue);
     void updateMidiActivity(bool active) { midiIndicator.setMidiActivity(active); }
+    
+    
 
 
     // New label to display MIDI CC info
@@ -82,6 +85,15 @@ private:
     
     //==============================================================================
     
+    // Timer callback to update MIDI connection status
+    void timerCallback() override;
+    // Update the connection status label
+    void updateConnectionStatus();
+    // Parameter attachment for the gain slider
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+    juce::Label gainLabel;
+    juce::Label connectionStatusLabel;
+
     // Declare a toggle button
     juce::ToggleButton toggleButton;
     juce::Slider gainSlider;
