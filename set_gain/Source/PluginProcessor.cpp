@@ -29,6 +29,7 @@ Test_filterAudioProcessor::Test_filterAudioProcessor()
 {
     midiController = std::make_unique<MidiGainController>(parameters);
     startMidiInput();  // Start listening to MIDI input
+    startTimer(2000);
 }
 
 Test_filterAudioProcessor::~Test_filterAudioProcessor()
@@ -238,5 +239,19 @@ void Test_filterAudioProcessor::handleIncomingMidiMessage(juce::MidiInput* sourc
     if (midiController)
     {
         midiController->handleIncomingMidiMessage(nullptr, message);
+    }
+}
+
+void Test_filterAudioProcessor::timerCallback()
+{
+    auto availableDevices = juce::MidiInput::getAvailableDevices();
+
+    if (!availableDevices.isEmpty() && !midiInputDevice) // If a device is available but not started
+    {
+        startMidiInput();
+    }
+    else if (availableDevices.isEmpty() && midiInputDevice) // If no devices are available but we're still running
+    {
+        stopMidiInput();
     }
 }

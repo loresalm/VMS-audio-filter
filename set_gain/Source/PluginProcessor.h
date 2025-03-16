@@ -15,7 +15,8 @@
 /**
 */
 class Test_filterAudioProcessor  : public juce::AudioProcessor,
-                                   public juce::MidiInputCallback
+                                   public juce::MidiInputCallback,
+                                   public juce::Timer
 {
 public:
     //==============================================================================
@@ -70,6 +71,7 @@ public:
     void startMidiInput();
     void stopMidiInput();
     void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
+    void timerCallback() override;
 
     
     
