@@ -26,7 +26,7 @@ public:
         // Set the hex color for the text box text (e.g., #FFA500 for orange)
         textColour = juce::Colour::fromString ("FF2a362f");
     }
-
+    /*
     void drawLabel(juce::Graphics& g, juce::Label& label) override
     {
         // Override the label drawing to use the custom text color
@@ -34,6 +34,28 @@ public:
         g.setFont(label.getFont());
         g.drawText(label.getText(), label.getLocalBounds(), juce::Justification::centred, false);
     }
+     */
+    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
+                              const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider) override
+    {
+        float diameter = juce::jmin(width, height);
+        float r = diameter/2.;
+        float cX = x - width/2.;
+        float cY = y - height/2.;
+        
+        
+        /*
+        float rX = cX + r;
+        float rY = cY + r;
+        juce::Rectangle<float> dialArea (rX, rY, diameter, diameter);
+        g.setColour(dialColour);
+        g.drawRect(dialArea);
+         */
+        juce::Rectangle<float> dialcenter (cX, cY, width, height);
+        g.setColour(textColour);
+        g.drawRect(dialcenter);
+    }
+    
 
 private:
     juce::Colour textColour; // Custom text color
