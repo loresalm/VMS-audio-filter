@@ -152,7 +152,10 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     
     // Get current gain value from ValueTreeState
     float gainValue = *parameters.getRawParameterValue("gain");
-    
+    if(gainValue>0.5){
+        juce::MidiMessage midiMessage = juce::MidiMessage::controllerEvent(1, 1, 64);
+        midiController->sendMidiMessage(midiMessage);
+    }
     // Apply gain to audio
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {

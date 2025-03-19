@@ -32,6 +32,9 @@ public:
     void prepareToPlay();
     
     //==============================================================================
+    // Send a MIDI message to the controller
+    void sendMidiMessage(const juce::MidiMessage& message);
+    
     // MidiInputCallback implementation
     void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
     // Refreshes the list of MIDI inputs and finds the controller
@@ -53,6 +56,9 @@ private:
     // MIDI parameters
     static constexpr int kMidiCC = 7;  // CC #7 is standard for volume control
     bool deviceConnected = false;
+    
+    // MIDI output device
+    std::unique_ptr<juce::MidiOutput> midiOutputDevice;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MidiController)
 };

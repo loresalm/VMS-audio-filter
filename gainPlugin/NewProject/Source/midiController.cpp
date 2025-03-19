@@ -34,6 +34,12 @@ MidiController::~MidiController()
     if (!lastConnectedDeviceID.isEmpty()) {
         deviceManager.removeMidiInputCallback(lastConnectedDeviceID, this);
     }
+    // Initialize MIDI output
+    auto availableDevices = juce::MidiOutput::getAvailableDevices();
+    if (!availableDevices.isEmpty())
+    {
+        midiOutputDevice = juce::MidiOutput::openDevice(availableDevices[0].identifier);
+    }
 }
 
 //==============================================================================
@@ -74,11 +80,27 @@ void MidiController::handleIncomingMidiMessage(juce::MidiInput* source, const ju
         
     }
 }
+
+void MidiController::sendMidiMessage(const juce::MidiMessage& message)
+{
+    if (midiOutputDevice)
+    {
+        midiOutputDevice->sendMessageNow(message);
+    }
+}
+
+
 //==============================================================================
 void MidiController::timerCallback()
 {
     // Periodically check if our device is still connected
     refreshMidiInputs();
+    // Initialize MIDI output
+    auto availableDevices = juce::MidiOutput::getAvailableDevices();
+    if (!availableDevices.isEmpty())
+    {
+        midiOutputDevice = juce::MidiOutput::openDevice(availableDevices[0].identifier);
+    }
 }
 
 void MidiController::refreshMidiInputs()

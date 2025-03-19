@@ -2,6 +2,11 @@
 
 // Define the pin where the potentiometer (knob) is connected
 const int potPin = A0;
+// led pins 
+const int pin_red = 9;
+const int pin_green = 3;
+const int pin_blue = 5;
+int ledValue = 0;
 
 // Define the MIDI channel and controller number
 const byte midiChannel = 0;  // MIDI channels are 0-15 in code (shown as 1-16 to users)
@@ -24,6 +29,10 @@ void setup() {
   for (int i = 0; i < numReadings; i++) {
     readings[i] = 0;
   }
+  // setup pin led 
+  pinMode(pin_red, OUTPUT);
+  pinMode(pin_green, OUTPUT);
+  pinMode(pin_blue, OUTPUT);
   
   // Start serial for debugging
   Serial.begin(115200);
@@ -31,6 +40,12 @@ void setup() {
 }
 
 void loop() {
+
+  // write to led
+  //analogWrite(pin_red, 255);
+  //analogWrite(pin_green, 0);
+  //analogWrite(pin_blue, 0);
+
   // Read the potentiometer and smooth the value
   total = total - readings[readIndex];
   readings[readIndex] = analogRead(potPin);
@@ -39,6 +54,18 @@ void loop() {
   
   // Calculate the average of readings
   average = total / numReadings;
+
+  ledValue = map(average, 0, 1023, 0, 1000);
+  if(ledValue < 500){
+    analogWrite(pin_red, 0);
+    analogWrite(pin_green, 0);
+    analogWrite(pin_blue, 255);
+  }else{
+    analogWrite(pin_red, 250);
+    analogWrite(pin_green, 0);
+    analogWrite(pin_blue, 0);
+  }
+  
   
   // Map the value to MIDI range (0-127)
   midiValue = map(average, 0, 1023, 0, 127);

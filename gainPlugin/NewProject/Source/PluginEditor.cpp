@@ -28,7 +28,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     gainSlider.setRange(0.0, 1.0);
     gainSlider.setValue(0.5);
     addAndMakeVisible(gainSlider);
-    gainSlider.setLookAndFeel(&customLookAndFeel);
+    //gainSlider.setLookAndFeel(&customLookAndFeel);
 
     // Start timer to check connection status periodically
     startTimer(1000); // Check every second
