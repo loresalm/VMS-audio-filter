@@ -66,6 +66,7 @@ private:
 
 class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor,
                                         public juce::Slider::Listener,
+                                        private juce::Button::Listener,
                                         public juce::AudioProcessorValueTreeState::Listener,
                                         private juce::Timer
 {
@@ -77,6 +78,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void sliderValueChanged(juce::Slider *slider) override;
+    // Button listener callback
+    void buttonClicked(juce::Button* button) override;
     // Listener function for parameter changes
     void parameterChanged(const juce::String& parameterID, float newValue) override;
     void updateMIDIText(int controllerNumber, int controllerValue);
@@ -104,6 +107,8 @@ private:
     juce::Label midiCCLabel;
     
     CustomLookAndFeel customLookAndFeel;
+    
+    juce::ToggleButton toggleButton; // Add a toggle button
 };
 
 

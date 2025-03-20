@@ -62,6 +62,10 @@ public:
             midiController->refreshMidiInputs();
             return midiController->isDeviceConnected();
         }
+    void sendMidi(const juce::MidiMessage& message)
+    {
+        midiController->sendMidiMessage(message);
+    }
     void startMidiInput();
     void stopMidiInput();
     int getControllerNumber() { return controllerNumber; }

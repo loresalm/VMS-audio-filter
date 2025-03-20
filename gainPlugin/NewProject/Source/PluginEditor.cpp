@@ -6,6 +6,11 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     setSize(400, 400);
+    
+    // Set up the toggle button
+    toggleButton.setButtonText("Toggle LED");
+    toggleButton.addListener(this); // Listen for button clicks
+    addAndMakeVisible(toggleButton); // Make the button visible
 
     // Connect slider to parameter using the getter method
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -38,6 +43,7 @@ NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 {
     stopTimer();
     gainAttachment.reset();
+    toggleButton.removeListener(this); // Clean up the listener
 }
 
 //==============================================================================
@@ -50,6 +56,9 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
 
 void NewProjectAudioProcessorEditor::resized()
 {
+    
+    // Position the toggle button
+    toggleButton.setBounds(40, 40, 150, 30);
     
     // Define the size and position of the gain knob
     int knobSize = 100; // Set the size of the gain knob
@@ -91,6 +100,19 @@ void NewProjectAudioProcessorEditor::updateConnectionStatus()
     connectionStatusLabel.setColour(
         juce::Label::textColourId,
         connected ? connectedColor : disconnectedColor);
+}
+
+void NewProjectAudioProcessorEditor::buttonClicked(juce::Button* button)
+{
+    if (button == &toggleButton)
+    {
+        // Get the current state of the toggle button
+        bool isOn = toggleButton.getToggleState();
+        
+        // Send a MIDI message to the Arduino
+        juce::MidiMessage midiMessage = juce::MidiMessage::controllerEvent(1, 7, isOn ? 127 : 0); // CC#7, channel 1, value 127 (on) or 0 (off)
+        audioProcessor.sendMidi(midiMessage);
+    }
 }
 
 void NewProjectAudioProcessorEditor::sliderValueChanged(juce::Slider *slider)

@@ -1,12 +1,16 @@
  #include <MIDIUSB.h>
-
+ #include <MIDI.h>
 // Define the pin where the potentiometer (knob) is connected
 const int potPin = A0;
 // led pins 
+const int ledPin = 9; // PWM pin for the LED
+/*
 const int pin_red = 9;
 const int pin_green = 3;
 const int pin_blue = 5;
 int ledValue = 0;
+*/
+
 
 // Define the MIDI channel and controller number
 const byte midiChannel = 0;  // MIDI channels are 0-15 in code (shown as 1-16 to users)
@@ -24,15 +28,24 @@ int readIndex = 0;
 int total = 0;
 int average = 0;
 
+MIDI_CREATE_DEFAULT_INSTANCE();
+
 void setup() {
   // Initialize the smoothing array
   for (int i = 0; i < numReadings; i++) {
     readings[i] = 0;
   }
   // setup pin led 
+  pinMode(ledPin, OUTPUT); // Set the LED pin as an output
+  /*
   pinMode(pin_red, OUTPUT);
   pinMode(pin_green, OUTPUT);
   pinMode(pin_blue, OUTPUT);
+  */
+
+  //setup midi in 
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  //MIDI.setHandleControlChange(MyCCFunction);
   
   // Start serial for debugging
   Serial.begin(115200);
@@ -40,6 +53,19 @@ void setup() {
 }
 
 void loop() {
+
+  if (MIDI.read()) { // Check if a MIDI message is received
+    if (MIDI.getType() == midi::ControlChange) { // Check if it's a Control Change message
+      if (MIDI.getData1() == 7) { // Check if it's CC#7
+        int value = MIDI.getData2(); // Get the value (0-127)
+        // Map the MIDI value (0-127) to a PWM value (0-255)
+        int pwmValue = map(value, 0, 127, 0, 255);
+        
+        // Set the LED brightness using PWM
+        analogWrite(ledPin, pwmValue);
+      }
+    }
+  }
 
   // write to led
   //analogWrite(pin_red, 255);
@@ -55,6 +81,7 @@ void loop() {
   // Calculate the average of readings
   average = total / numReadings;
 
+/*
   ledValue = map(average, 0, 1023, 0, 1000);
   if(ledValue < 500){
     analogWrite(pin_red, 0);
@@ -65,6 +92,7 @@ void loop() {
     analogWrite(pin_green, 0);
     analogWrite(pin_blue, 0);
   }
+  */
   
   
   // Map the value to MIDI range (0-127)
@@ -108,3 +136,11 @@ void sendMidiCC(byte channel, byte control, byte value) {
   MidiUSB.sendMIDI(event);
   MidiUSB.flush();
 }
+/*
+void MyCCFunction(byte channel, byte number, byte value){
+    Serial.print("got MIDI msg ");
+    Serial.print(number);
+    Serial.print(" value: ");
+    Serial.print(value);
+}
+*/
